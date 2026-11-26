@@ -119,4 +119,30 @@ for table in ["BOOK", "AUTHORS", "BOOK_AUTHORS", "BORROWER", "BOOK_LOANS", "FINE
     count = cursor.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
     print(f"{table:<14} -> {count:,} rows")
 
+# Functional Requirement 2: Book Search and Availability
+def search(search_string):
+    pattern = f"%{search_string}%"
+    result = cursor.execute("""
+        SELECT BOOK.Isbn, BOOK.Title, GROUP_CONCAT(AUTHORS.Name, ', ')
+        FROM BOOK, BOOK_AUTHORS, AUTHORS
+        WHERE
+            (BOOK.Isbn=BOOK_AUTHORS.Isbn AND BOOK_AUTHORS.Author_id=AUTHORS.Author_id)
+            AND
+            (BOOK.Isbn LIKE ? OR BOOK.Title LIKE ? OR AUTHORS.Name LIKE ?)
+        GROUP BY BOOK.Isbn
+    """, (pattern,pattern,pattern))
+    result = list(result)
+    no_maxlen = max(2, len(str(len(result))))
+    title_maxlen = 5
+    authors_maxlen = 7
+    for _, title, authors in result:
+        if len(title) > title_maxlen:
+            title_maxlen = len(title)
+        if len(authors) > authors_maxlen:
+            authors_maxlen = len(authors)
+    print(f"{'NO':<{no_maxlen}}  {'ISBN':<13}  {'TITLE':<{title_maxlen}}  {'AUTHORS':<{authors_maxlen}}")
+    for i, (isbn, title, authors) in enumerate(result, start=1):
+        print(f"{i:0>{no_maxlen}}  {isbn:<13}  {title:<{title_maxlen}}  {authors:<{authors_maxlen}}")
+       
+cursor.close()
 conn.close()
