@@ -117,7 +117,7 @@ conn.commit()
 
 for table in ["BOOK", "AUTHORS", "BOOK_AUTHORS", "BORROWER", "BOOK_LOANS", "FINES"]:
     count = cursor.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-    print(f"{table:<14} -> {count:,} rows")
+
 
 # Functional Requirement 2: Book Search and Availability
 def search(search_string):
